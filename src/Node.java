@@ -1,6 +1,6 @@
 import java.util.Hashtable;
 
-public class Node extends Thread {
+public class Node {
     public int nodeID;
     public Hashtable<Integer, Integer> linkCost; //Neighbor id, link cost
     public Hashtable<Integer, Integer> linkBandwidth; //Neighbor id, link bandwidth
@@ -13,7 +13,6 @@ public class Node extends Thread {
         this.nodeID = nodeID;
         this.linkCost = linkCost;
         this.linkBandwidth = linkBandwidth;
-
-
     }
+
 }
