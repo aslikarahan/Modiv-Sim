@@ -49,7 +49,7 @@ public class ModivSim {
             }
             if (counter == nodeNumber) {
                 globalConvergence = true;
-                System.out.println("All nodes converged!");
+                System.out.println("All nodes converged! at round: " + m.roundNumber);
                 for (Node node : nodes){
                     Hashtable<String, Integer[]> forwardingTable = node.getForwardingTable();
                     printForwardingTable(forwardingTable, node.nodeID);

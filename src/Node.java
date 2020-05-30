@@ -13,10 +13,12 @@ public class Node extends Thread{
     public Integer[] convergedDistanceVector;
     public int totalNumberOfNodes;
     public boolean converged = false;
+    public int roundNumber;
     final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
 
     public Node(int nodeID, Hashtable<Integer, Integer> linkCost, Hashtable<Integer, Integer> linkBandwidth) {
+        this.roundNumber = 0;
         this.nodeID = nodeID;
         this.linkCost = linkCost;
         this.linkBandwidth = linkBandwidth;
@@ -55,6 +57,7 @@ public class Node extends Thread{
     }
 
     public boolean sendUpdate(){
+        roundNumber++;
         Integer[] outgoingDistanceVector = constructDistanceVector();
 
         if(Arrays.equals(outgoingDistanceVector, convergedDistanceVector)){
@@ -64,7 +67,7 @@ public class Node extends Thread{
         }
 
         for(int neighborID :linkCost.keySet()){
-            Message m = new Message(nodeID, neighborID, linkBandwidth.get(neighborID), outgoingDistanceVector, converged);
+            Message m = new Message(nodeID, neighborID, linkBandwidth.get(neighborID), outgoingDistanceVector, converged, roundNumber);
             System.out.println(m.toString());
             ModivSim.forwardMessage(m);
         }
