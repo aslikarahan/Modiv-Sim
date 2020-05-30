@@ -5,7 +5,9 @@ import java.util.Scanner;
 
 public class ModivSim {
     private static ModivSim singletonInstance;
-    public ArrayList<Node> nodes = new ArrayList<>();
+    public static ArrayList<Node> nodes = new ArrayList<>();
+    public int nodeNumber;
+
     private ModivSim() {
     }
     public static ModivSim getInstance() {
@@ -18,7 +20,12 @@ public class ModivSim {
         }
         return singletonInstance;
     }
-    
+
+    public static void forwardMessage(Message m) {
+        int targetNodeID = m.receiverID;
+        nodes.get(targetNodeID).receiveUpdate(m);
+    }
+
     public void readInputFile(String directory){
         File dir = new File(directory);
         File[] files = dir.listFiles(new FilenameFilter() {
@@ -26,6 +33,7 @@ public class ModivSim {
                 return filename.toLowerCase().endsWith(".txt");
             }
         });
+        nodeNumber = files.length;
         for(File f : files){
             try {
                 FileInputStream fis=new FileInputStream(directory +"/" +f.getName());
