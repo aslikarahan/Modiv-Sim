@@ -52,6 +52,7 @@ public class ModivSim {
                 System.out.println("All nodes converged! at round: " + m.roundNumber);
                 for (Node node : nodes){
                     Hashtable<String, Integer[]> forwardingTable = node.getForwardingTable();
+                    node.printDistanceTable();
                     printForwardingTable(forwardingTable, node.nodeID);
                 }
             }

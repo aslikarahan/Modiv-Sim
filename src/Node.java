@@ -57,6 +57,7 @@ public class Node extends Thread{
     }
 
     public boolean sendUpdate(){
+        printDistanceTable();
         roundNumber++;
         Integer[] outgoingDistanceVector = constructDistanceVector();
 
@@ -68,7 +69,7 @@ public class Node extends Thread{
 
         for(int neighborID :linkCost.keySet()){
             Message m = new Message(nodeID, neighborID, linkBandwidth.get(neighborID), outgoingDistanceVector, converged, roundNumber);
-            System.out.println(m.toString());
+            //System.out.println(m.toString());
             ModivSim.forwardMessage(m);
         }
         return true;
@@ -126,5 +127,19 @@ public class Node extends Thread{
     }
 
 
+    public synchronized void printDistanceTable() {
+        String firstLine = ANSI_RESET + ModivSim.getInstance().getColor(nodeID) + "\nPrinting distance table for node " + nodeID + ": \nDest \t|";
 
+        for(int i = 0; i < totalNumberOfNodes; i++){
+            firstLine = firstLine + "\t " + i;
+        }
+       firstLine = firstLine + "\n----------------------------------------";
+
+        for(Integer neighbor : distanceTable.keySet()){
+            firstLine = firstLine + "\nNeighbor " + neighbor.toString() + "\t" + Arrays.toString(distanceTable.get(neighbor)) ;
+        }
+        firstLine = firstLine + ANSI_RESET;
+
+        System.out.println(firstLine);
+    }
 }
