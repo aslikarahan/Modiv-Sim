@@ -1,14 +1,31 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Scanner;
 
 public class ModivSim {
     private static ModivSim singletonInstance;
     public static ArrayList<Node> nodes = new ArrayList<>();
     public int nodeNumber;
+    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
+    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
+    public List<String> colorlist = new ArrayList<>();
+
 
     private ModivSim() {
+//        colorlist.add(ANSI_BLACK_BACKGROUND);
+        colorlist.add(ANSI_RED_BACKGROUND);
+        colorlist.add(ANSI_GREEN_BACKGROUND);
+//        colorlist.add(ANSI_YELLOW_BACKGROUND);
+        colorlist.add(ANSI_BLUE_BACKGROUND);
+        colorlist.add(ANSI_PURPLE_BACKGROUND);
+        colorlist.add(ANSI_CYAN_BACKGROUND);
     }
     public static ModivSim getInstance() {
         if(singletonInstance == null) {
@@ -21,7 +38,7 @@ public class ModivSim {
         return singletonInstance;
     }
 
-    public static void forwardMessage(Message m) {
+    public synchronized static void forwardMessage(Message m) {
         int targetNodeID = m.receiverID;
         nodes.get(targetNodeID).receiveUpdate(m);
     }
@@ -73,5 +90,9 @@ public class ModivSim {
             n.start();
         }
     }
+    public String getColor(int i){
+        return colorlist.get(i);
+    }
+
 
 }

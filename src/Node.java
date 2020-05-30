@@ -2,18 +2,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Node extends Thread{
     public int nodeID;
     public Hashtable<Integer, Integer> linkCost; //Neighbor id, link cost
     public Hashtable<Integer, Integer> linkBandwidth; //Neighbor id, link bandwidth
-    public HashMap<Integer, Integer[]> distanceTable = new HashMap<>(); //Neighbor id, array of costs to each node
+    public ConcurrentHashMap<Integer, Integer[]> distanceTable = new ConcurrentHashMap<>(); //Neighbor id, array of costs to each node
     public Integer[] bottleneckBandwidthTable;
     public final int infinite = 999;
+    public static final String ANSI_RESET = "\u001B[30m";
+
     public int totalNumberOfNodes;
     final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
@@ -37,39 +36,46 @@ public class Node extends Thread{
         }
     }
 
-    public void receiveUpdate(Message m){
+    public synchronized void receiveUpdate(Message m){
         int senderID = m.senderID;
-        int[] newDistanceVector = m.distanceVector;
+        Integer[] newDistanceVector = new Integer[totalNumberOfNodes];
+        Arrays.fill(newDistanceVector, infinite);
+
+//        System.out.println(m + " link cost is " + linkCost.get(senderID));
 
         for(int i = 0; i < newDistanceVector.length; i++){
-
+            if(m.distanceVector[i] != infinite)
+                newDistanceVector[i] = m.distanceVector[i] + linkCost.get(senderID);
         }
+        newDistanceVector[nodeID] = 0;
+        distanceTable.put(senderID, newDistanceVector);
+//        System.out.println( Arrays.toString(newDistanceVector));
     }
     public void run(){
         startScheduling();
     }
 
     public boolean sendUpdate(){
-        int[] distanceVector = constructDistanceVector();
+        Integer[] outgoingDistanceVector = constructDistanceVector();
 
         for(int neighborID :linkCost.keySet()){
-            Message m = new Message(nodeID, neighborID, linkBandwidth.get(neighborID), distanceVector);
+            Message m = new Message(nodeID, neighborID, linkBandwidth.get(neighborID), outgoingDistanceVector);
+            System.out.println(m.toString());
             ModivSim.forwardMessage(m);
         }
         return true;
     }
 
-    private int[] constructDistanceVector() {
-        int[] distanceVector = new int[totalNumberOfNodes];
-        Arrays.fill(distanceVector, infinite);
+    private Integer[] constructDistanceVector() {
+        Integer[] distanceVectorInitial = new Integer[totalNumberOfNodes];
+        Arrays.fill(distanceVectorInitial, infinite);
 
         for (Integer[] tableEntry : distanceTable.values()) {
             for(int i = 0; i < totalNumberOfNodes; i++) {
-                distanceVector[i] = Math.min(distanceVector[i], tableEntry[i]);
+                distanceVectorInitial[i] = Math.min(distanceVectorInitial[i], tableEntry[i]);
             }
         }
-
-        return distanceVector;
+        return distanceVectorInitial;
     }
 
     public Hashtable<Integer, Integer[]> getForwardingTable(){
@@ -84,9 +90,10 @@ public class Node extends Thread{
                                                       sendUpdate();
                                                   }
                                               },
-                        5,30,
+                        5,10,
                         TimeUnit.SECONDS);
     }
+
 
 
 }
