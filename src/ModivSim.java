@@ -61,6 +61,11 @@ public class ModivSim {
 
     private static void printForwardingTable(Hashtable<String, Integer[]> forwardingTable, int nodeID) {
 
+        System.out.println("Forwarding table for node " + nodeID + ":");
+
+        for(String s: forwardingTable.keySet()){
+            System.out.println(s + "\t" + Arrays.toString(forwardingTable.get(s)));
+        }
     }
 
     public void readInputFile(String directory){
