@@ -1,13 +1,10 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class ModivSim {
     private static ModivSim singletonInstance;
     public static ArrayList<Node> nodes = new ArrayList<>();
-    public int nodeNumber;
+    public static int nodeNumber;
     public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
     public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
     public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
@@ -16,6 +13,8 @@ public class ModivSim {
     public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
     public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
     public List<String> colorlist = new ArrayList<>();
+    public static boolean[] convergenceArray;
+    public static boolean globalConvergence = false;
 
 
     private ModivSim() {
@@ -40,7 +39,28 @@ public class ModivSim {
 
     public synchronized static void forwardMessage(Message m) {
         int targetNodeID = m.receiverID;
+        int senderID = m.senderID;
+        convergenceArray[senderID] = m.convergence;
+        if(!globalConvergence) {
+            int counter = 0;
+            for (boolean t : convergenceArray) {
+                if (t)
+                    counter++;
+            }
+            if (counter == nodeNumber) {
+                globalConvergence = true;
+                System.out.println("All nodes converged!");
+                for (Node node : nodes){
+                    Hashtable<String, Integer[]> forwardingTable = node.getForwardingTable();
+                    printForwardingTable(forwardingTable, node.nodeID);
+                }
+            }
+        }
         nodes.get(targetNodeID).receiveUpdate(m);
+    }
+
+    private static void printForwardingTable(Hashtable<String, Integer[]> forwardingTable, int nodeID) {
+
     }
 
     public void readInputFile(String directory){
@@ -51,6 +71,8 @@ public class ModivSim {
             }
         });
         nodeNumber = files.length;
+        convergenceArray = new boolean[nodeNumber];
+        Arrays.fill(convergenceArray, false);
         for(File f : files){
             try {
                 FileInputStream fis=new FileInputStream(directory +"/" +f.getName());
